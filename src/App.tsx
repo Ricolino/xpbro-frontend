@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Hello from "./pages/Hello";
+import UserProfile from "./pages/UserProfile";
 
 function PrivateRoute({ children }: { children: ReactNode }) {
   const isAuthenticated = true; // sau logica ta reală
@@ -22,6 +23,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <Hello />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/userProfile"
+            element={
+              <PrivateRoute>
+                <UserProfile />
               </PrivateRoute>
             }
           />
