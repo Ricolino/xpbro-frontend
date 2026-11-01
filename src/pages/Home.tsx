@@ -1,9 +1,10 @@
 export default function Home() {
-  return( 
+  return(
     <div>
-      <h1>Home Page</h1>
-      <button onClick={() => window.location.href = '/login'}>Go to Login</button>
-      <button onClick={() => window.location.href = '/userProfile'}>Go to User Profile</button>
+    <h1>Home Page</h1>
+    <button onClick={() => window.location.href = '/login'}>Go to Login</button>
+    <button onClick={() => window.location.href = '/userProfile'}>Go to User Profile</button>
+    <button onClick={() => window.location.href = '/gameCollection'}>Go to Game Collection</button>
     </div>
   );
 }

@@ -18,183 +18,183 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
 
 export default function Login() {
   const [authMode, setAuthMode] = useState<AuthMode>('login')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [status, setStatus] = useState('')
-  const [session, setSession] = useState<Session | null>(null)
-  const [articles, setArticles] = useState<Article[]>([])
-  const [loadingArticles, setLoadingArticles] = useState(false)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [status, setStatus] = useState('')
+    const [session, setSession] = useState<Session | null>(null)
+      const [articles, setArticles] = useState<Article[]>([])
+      const [loadingArticles, setLoadingArticles] = useState(false)
 
-  // Restore session on load
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: activeSession } }) => {
-      setSession(activeSession)
-    })
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, newSession: Session | null) => {
-        setSession(newSession)
-      }
-    )
-
-    return () => {
-      listener.subscription.unsubscribe()
-    }
-  }, [])
-
-  // Login / Signup handler
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-
-    if (authMode === 'login') {
-      setStatus('Se autentifică…')
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      setStatus(error ? `Autentificarea nu a reușit: ${error.message}` : 'Autentificare reușită.')
-    } else {
-      setStatus('Se creează contul…')
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: window.location.origin }
+      // Restore session on load
+      useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session: activeSession } }) => {
+          setSession(activeSession)
       })
 
-      if (error) {
-        setStatus(`Crearea contului nu a reușit: ${error.message}`)
-      } else if (data.session) {
-        setStatus('Cont creat și autentificat cu succes.')
-      } else {
-        setStatus('Cont creat. Verifică emailul și confirmă adresa înainte de autentificare.')
+      const { data: listener } = supabase.auth.onAuthStateChange(
+        (_event: AuthChangeEvent, newSession: Session | null) => {
+          setSession(newSession)
+        }
+      )
+
+      return () => {
+        listener.subscription.unsubscribe()
       }
-    }
-  }
+    }, [])
 
-  // Google OAuth
-  async function handleGoogleLogin() {
-    setStatus('Redirecting to Google…')
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    })
-    if (error) setStatus(`Error connecting to Google: ${error.message}`)
-  }
+    // Login / Signup handler
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
 
-  // Logout
-  async function handleLogout() {
-    setStatus('Logging out…')
-    const { error } = await supabase.auth.signOut()
-    setStatus(error ? `Logout failed: ${error.message}` : 'You have been logged out.')
-  }
+        if (authMode === 'login') {
+            setStatus('Se autentifică…')
+            const { error } = await supabase.auth.signInWithPassword({ email, password })
+            setStatus(error ? `Autentificarea nu a reușit: ${error.message}` : 'Autentificare reușită.')
+          } else {
+            setStatus('Se creează contul…')
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: { emailRedirectTo: window.location.origin }
+            })
 
-  // Load articles
-  async function loadArticles() {
-    setLoadingArticles(true)
-    setStatus('Loading articles…')
+            if (error) {
+                setStatus(`Crearea contului nu a reușit: ${error.message}`)
+              } else if (data.session) {
+                setStatus('Cont creat și autentificat cu succes.')
+              } else {
+                setStatus('Cont creat. Verifică emailul și confirmă adresa înainte de autentificare.')
+              }
+            }
+          }
 
-    const { data, error } = await supabase
-      .from('posts')
-      .select('title, body, published_at')
-      .eq('published', true)
-      .order('published_at', { ascending: false })
+          // Google OAuth
+          async function handleGoogleLogin() {
+            setStatus('Redirecting to Google…')
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: { redirectTo: window.location.origin }
+            })
+            if (error) setStatus(`Error connecting to Google: ${error.message}`)
+            }
 
-    if (error) {
-      setStatus(`Error: ${error.message}`)
-      setArticles([])
-    } else {
-      setStatus('Articles loaded.')
-      setArticles(data || [])
-    }
+            // Logout
+            async function handleLogout() {
+              setStatus('Logging out…')
+              const { error } = await supabase.auth.signOut()
+              setStatus(error ? `Logout failed: ${error.message}` : 'You have been logged out.')
+            }
 
-    setLoadingArticles(false)
-  }
+            // Load articles
+            async function loadArticles() {
+              setLoadingArticles(true)
+              setStatus('Loading articles…')
 
-  const isLoggedIn = Boolean(session)
+              const { data, error } = await supabase
+              .from('posts')
+              .select('title, body, published_at')
+              .eq('published', true)
+              .order('published_at', { ascending: false })
 
-  return (
-    <div>
-      <section className="auth-card">
-        {!isLoggedIn && (
-          <>
-            <h2>{authMode === 'login' ? 'Autentificare' : 'Creare cont nou'}</h2>
+              if (error) {
+                  setStatus(`Error: ${error.message}`)
+                  setArticles([])
+                } else {
+                  setStatus('Articles loaded.')
+                  setArticles(data || [])
+                }
 
-            <div id="oauth-area">
-              <button onClick={handleGoogleLogin} type="button">
-                Continue with Google
-              </button>
-              <div className="separator">or</div>
-            </div>
+                setLoadingArticles(false)
+              }
 
-            <form onSubmit={handleSubmit}>
-              <label>Email</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="nume@exemplu.com"
-              />
+              const isLoggedIn = Boolean(session)
 
-              <label>Password</label>
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-              />
+              return (
+                <div>
+                  <section className="auth-card">
+                    {!isLoggedIn && (
+                      <>
+                    <h2>{authMode === 'login' ? 'Autentificare' : 'Creare cont nou'}</h2>
 
-              <button type="submit">
-                {authMode === 'login' ? 'Intră în cont' : 'Înregistrare'}
-              </button>
-            </form>
+                      <div id="oauth-area">
+                        <button onClick={handleGoogleLogin} type="button">
+                          Continue with Google
+                        </button>
+                      <div className="separator">or</div>
+                      </div>
 
-            <div className="auth-actions">
-              {authMode === 'login' ? (
-                <p>
-                  Nu ai un cont?{' '}
-                  <a onClick={() => setAuthMode('signup')}>Înregistrează-te</a>
-                </p>
-              ) : (
-                <p>
-                  Ai deja cont?{' '}
-                  <a onClick={() => setAuthMode('login')}>Autentifică-te</a>
-                </p>
-              )}
-            </div>
-          </>
-        )}
+                      <form onSubmit={handleSubmit}>
+                      <label>Email</label>
+                        <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="nume@exemplu.com"
+                        />
 
-        {isLoggedIn && (
-          <>
-            <p>Connected as {session?.user?.email}</p>
-            <button onClick={handleLogout}>Logout</button>
-          </>
-        )}
+                      <label>Password</label>
+                        <input
+                        type="password"
+                        required
+                        minLength={6}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        />
 
-        <p id="auth-status">{status}</p>
-      </section>
-      
-      <button onClick={() => window.location.href = '/'}>Back home</button>
-      <button onClick={loadArticles}>Load articles</button>
+                        <button type="submit">
+                          {authMode === 'login' ? 'Intră în cont' : 'Înregistrare'}
+                        </button>
+                      </form>
 
-      <section id="articles" className="articles">
-        {loadingArticles && <p>Loading…</p>}
-        {!loadingArticles && articles.length === 0 && <p>No articles published at the moment.</p>}
-
-        {articles.map((post, i) => (
-          <article key={i} className="article-card">
-            <h2>{post.title}</h2>
-            {post.published_at && (
-              <time dateTime={post.published_at}>
-                {new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long' }).format(
-                  new Date(post.published_at)
+                      <div className="auth-actions">
+                        {authMode === 'login' ? (
+                          <p>
+                            Nu ai un cont?{' '}
+                          <a onClick={() => setAuthMode('signup')}>Înregistrează-te</a>
+                          </p>
+                        ) : (
+                          <p>
+                            Ai deja cont?{' '}
+                          <a onClick={() => setAuthMode('login')}>Autentifică-te</a>
+                          </p>
+                      )}
+                    </div>
+                    </>
                 )}
-              </time>
-            )}
+
+                {isLoggedIn && (
+                  <>
+                <p>Connected as {session?.user?.email}</p>
+                <button onClick={handleLogout}>Logout</button>
+                  </>
+              )}
+
+            <p id="auth-status">{status}</p>
+            </section>
+
+          <button onClick={() => window.location.href = '/'}>Back home</button>
+          <button onClick={loadArticles}>Load articles</button>
+
+            <section id="articles" className="articles">
+            {loadingArticles && <p>Loading…</p>}
+            {!loadingArticles && articles.length === 0 && <p>No articles published at the moment.</p>}
+
+              {articles.map((post, i) => (
+                <article key={i} className="article-card">
+                <h2>{post.title}</h2>
+                  {post.published_at && (
+                    <time dateTime={post.published_at}>
+                      {new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long' }).format(
+                        new Date(post.published_at)
+                    )}
+                  </time>
+              )}
             <p>{post.body}</p>
-          </article>
-        ))}
-      </section>
-    </div>
-  )
+            </article>
+      ))}
+    </section>
+  </div>
+)
 }
