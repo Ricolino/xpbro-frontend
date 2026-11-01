@@ -6,44 +6,53 @@ import Login from "./pages/Login";
 import Hello from "./pages/Hello";
 import UserProfile from "./pages/UserProfile";
 import GameCollection from "./pages/GameCollection";
+import Posts from "./pages/Posts";
 
 function PrivateRoute({ children }: { children: ReactNode }) {
-    const isAuthenticated = true; // sau logica ta reală
-    return isAuthenticated ? children : <Navigate to="/login" replace />;
-  }
+  const isAuthenticated = true; // sau logica ta reală
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
 
-  export default function App() {
-    return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
 
-          <Route
+        <Route
           path="/hello"
           element={
             <PrivateRoute>
               <Hello />
             </PrivateRoute>
           }
-          />
-          <Route
+        />
+        <Route
           path="/userProfile"
           element={
             <PrivateRoute>
               <UserProfile />
             </PrivateRoute>
           }
-          />
-          <Route
+        />
+        <Route
           path="/gameCollection"
           element={
             <PrivateRoute>
               <GameCollection />
             </PrivateRoute>
           }
-          />
-        </Routes>
-      </BrowserRouter>
-    )
-  }
+        />
+        <Route
+          path="/posts"
+          element={
+            <PrivateRoute>
+              <Posts />
+            </PrivateRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}

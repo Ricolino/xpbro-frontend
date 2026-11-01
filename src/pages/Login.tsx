@@ -22,9 +22,7 @@ export default function Login() {
     const [password, setPassword] = useState('')
     const [status, setStatus] = useState('')
     const [session, setSession] = useState<Session | null>(null)
-      const [articles, setArticles] = useState<Article[]>([])
-      const [loadingArticles, setLoadingArticles] = useState(false)
-
+      
       // Restore session on load
       useEffect(() => {
         supabase.auth.getSession().then(({ data: { session: activeSession } }) => {
@@ -85,116 +83,74 @@ export default function Login() {
               setStatus(error ? `Logout failed: ${error.message}` : 'You have been logged out.')
             }
 
-            // Load articles
-            async function loadArticles() {
-              setLoadingArticles(true)
-              setStatus('Loading articles…')
+            const isLoggedIn = Boolean(session)
 
-              const { data, error } = await supabase
-              .from('posts')
-              .select('title, body, published_at')
-              .eq('published', true)
-              .order('published_at', { ascending: false })
+            return (
+              <div>
+                <section className="auth-card">
+                  {!isLoggedIn && (
+                    <>
+                  <h2>{authMode === 'login' ? 'Autentificare' : 'Creare cont nou'}</h2>
 
-              if (error) {
-                  setStatus(`Error: ${error.message}`)
-                  setArticles([])
-                } else {
-                  setStatus('Articles loaded.')
-                  setArticles(data || [])
-                }
-
-                setLoadingArticles(false)
-              }
-
-              const isLoggedIn = Boolean(session)
-
-              return (
-                <div>
-                  <section className="auth-card">
-                    {!isLoggedIn && (
-                      <>
-                    <h2>{authMode === 'login' ? 'Autentificare' : 'Creare cont nou'}</h2>
-
-                      <div id="oauth-area">
-                        <button onClick={handleGoogleLogin} type="button">
-                          Continue with Google
-                        </button>
-                      <div className="separator">or</div>
-                      </div>
-
-                      <form onSubmit={handleSubmit}>
-                      <label>Email</label>
-                        <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="nume@exemplu.com"
-                        />
-
-                      <label>Password</label>
-                        <input
-                        type="password"
-                        required
-                        minLength={6}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        />
-
-                        <button type="submit">
-                          {authMode === 'login' ? 'Intră în cont' : 'Înregistrare'}
-                        </button>
-                      </form>
-
-                      <div className="auth-actions">
-                        {authMode === 'login' ? (
-                          <p>
-                            Nu ai un cont?{' '}
-                          <a onClick={() => setAuthMode('signup')}>Înregistrează-te</a>
-                          </p>
-                        ) : (
-                          <p>
-                            Ai deja cont?{' '}
-                          <a onClick={() => setAuthMode('login')}>Autentifică-te</a>
-                          </p>
-                      )}
+                    <div id="oauth-area">
+                      <button onClick={handleGoogleLogin} type="button">
+                        Continue with Google
+                      </button>
+                    <div className="separator">or</div>
                     </div>
-                    </>
-                )}
 
-                {isLoggedIn && (
-                  <>
-                <p>Connected as {session?.user?.email}</p>
-                <button onClick={handleLogout}>Logout</button>
+                    <form onSubmit={handleSubmit}>
+                    <label>Email</label>
+                      <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="nume@exemplu.com"
+                      />
+
+                    <label>Password</label>
+                      <input
+                      type="password"
+                      required
+                      minLength={6}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      />
+
+                      <button type="submit">
+                        {authMode === 'login' ? 'Intră în cont' : 'Înregistrare'}
+                      </button>
+                    </form>
+
+                    <div className="auth-actions">
+                      {authMode === 'login' ? (
+                        <p>
+                          Nu ai un cont?{' '}
+                        <a onClick={() => setAuthMode('signup')}>Înregistrează-te</a>
+                        </p>
+                      ) : (
+                        <p>
+                          Ai deja cont?{' '}
+                        <a onClick={() => setAuthMode('login')}>Autentifică-te</a>
+                        </p>
+                    )}
+                  </div>
                   </>
               )}
 
-            <p id="auth-status">{status}</p>
-            </section>
+              {isLoggedIn && (
+                <>
+              <p>Connected as {session?.user?.email}</p>
+              <button onClick={handleLogout}>Logout</button>
+                </>
+            )}
 
-          <button onClick={() => window.location.href = '/'}>Back home</button>
-          <button onClick={loadArticles}>Load articles</button>
+          <p id="auth-status">{status}</p>
+          </section>
 
-            <section id="articles" className="articles">
-            {loadingArticles && <p>Loading…</p>}
-            {!loadingArticles && articles.length === 0 && <p>No articles published at the moment.</p>}
-
-              {articles.map((post, i) => (
-                <article key={i} className="article-card">
-                <h2>{post.title}</h2>
-                  {post.published_at && (
-                    <time dateTime={post.published_at}>
-                      {new Intl.DateTimeFormat('ro-RO', { dateStyle: 'long' }).format(
-                        new Date(post.published_at)
-                    )}
-                  </time>
-              )}
-            <p>{post.body}</p>
-            </article>
-      ))}
-    </section>
-  </div>
-)
-}
+        <button onClick={() => window.location.href = '/'}>Back home</button>
+        </div>
+      )
+    }
