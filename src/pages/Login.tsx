@@ -8,12 +8,6 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_t7ZQBoQoOEEeFU1xWd9Jag_yc2e6Fm-
 
 type AuthMode = 'login' | 'signup'
 
-type Article = {
-  title: string
-  body: string
-  published_at?: string | null
-}
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
 
 export default function Login() {
