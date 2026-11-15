@@ -5,7 +5,7 @@ import type {
   ResetUserPasswordRequest,
   UpdateUserRequest,
   UserSummary,
-} from "../types";
+} from "@/types";
 
 export const usersApi = {
   getUsers: async (): Promise<UserSummary[]> => {

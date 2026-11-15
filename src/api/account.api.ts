@@ -4,7 +4,7 @@ import type {
   ChangePasswordRequest,
   CurrentUser,
   UpdateProfileRequest,
-} from "../types";
+} from "@/types";
 
 export const accountApi = {
   me: async (): Promise<CurrentUser> => {

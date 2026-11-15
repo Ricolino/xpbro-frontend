@@ -6,7 +6,7 @@ import type {
   LoginRequest,
   RegisterRequest,
   ResetPasswordRequest,
-} from "../types";
+} from "@/types";
 
 export const authApi = {
   register: async (request: RegisterRequest): Promise<void> => {
