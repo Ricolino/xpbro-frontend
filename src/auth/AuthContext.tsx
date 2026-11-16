@@ -10,26 +10,41 @@ import {
 
 import { accountApi } from "@/api/account.api";
 import { authApi } from "@/api/auth.api";
-import { setAccessToken } from "@/api/axios";
+import {
+  setAccessToken,
+} from "@/api/axios";
 
 import type {
   CurrentUser,
   LoginRequest,
-} from "../types";
+} from "@/types";
 
 interface AuthContextValue {
   user: CurrentUser | null;
+
   isAuthenticated: boolean;
+
   isLoading: boolean;
 
-  login: (request: LoginRequest) => Promise<void>;
+  login: (
+    request: LoginRequest
+  ) => Promise<void>;
+
   logout: () => Promise<void>;
+
   refreshUser: () => Promise<void>;
+
+  authenticate: (
+    accessToken: string
+  ) => Promise<void>;
+
+  clearAuthentication: () => void;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(
-  null
-);
+const AuthContext =
+  createContext<AuthContextValue | null>(
+    null
+  );
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -39,91 +54,139 @@ export const AuthProvider = ({
   children,
 }: AuthProviderProps) => {
   const [user, setUser] =
-    useState<CurrentUser | null>(null);
+    useState<CurrentUser | null>(
+      null
+    );
 
   const [isLoading, setIsLoading] =
     useState(true);
 
-  const refreshUser = useCallback(async () => {
-    const currentUser = await accountApi.me();
-    setUser(currentUser);
-  }, []);
+  const refreshUser = useCallback(
+    async () => {
+      const currentUser =
+        await accountApi.me();
 
-  const login = useCallback(
-    async (request: LoginRequest) => {
-      const response = await authApi.login(
-        request
-      );
-
-      setAccessToken(response.accessToken);
-
-      await refreshUser();
+      setUser(currentUser);
     },
-    [refreshUser]
+    []
   );
 
-  const logout = useCallback(async () => {
-    try {
-      await authApi.logout();
-    } finally {
+  const clearAuthentication =
+    useCallback(() => {
       setAccessToken(null);
+
       setUser(null);
-    }
-  }, []);
+    }, []);
 
-  useEffect(() => {
-    const bootstrapAuth = async () => {
-      try {
-        const response =
-          await authApi.refresh();
-
+  const authenticate =
+    useCallback(
+      async (
+        accessToken: string
+      ) => {
         setAccessToken(
-          response.accessToken
+          accessToken
         );
 
-        const currentUser =
-          await accountApi.me();
+        await refreshUser();
+      },
+      [refreshUser]
+    );
 
-        setUser(currentUser);
-      } catch {
-        setAccessToken(null);
-        setUser(null);
+  const login = useCallback(
+    async (
+      request: LoginRequest
+    ) => {
+      const response =
+        await authApi.login(
+          request
+        );
+
+      await authenticate(
+        response.accessToken
+      );
+    },
+    [authenticate]
+  );
+
+  const logout = useCallback(
+    async () => {
+      try {
+        await authApi.logout();
       } finally {
-        setIsLoading(false);
+        clearAuthentication();
       }
-    };
+    },
+    [clearAuthentication]
+  );
+
+  useEffect(() => {
+    const bootstrapAuth =
+      async () => {
+        try {
+          const response =
+            await authApi.refresh();
+
+          await authenticate(
+            response.accessToken
+          );
+        } catch {
+          clearAuthentication();
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
     void bootstrapAuth();
-  }, []);
+  }, [
+    authenticate,
+    clearAuthentication,
+  ]);
 
-  const value = useMemo<AuthContextValue>(
+  const value = useMemo<
+    AuthContextValue
+  >(
     () => ({
       user,
+
       isAuthenticated: !!user,
+
       isLoading,
 
       login,
       logout,
+
       refreshUser,
+
+      authenticate,
+
+      clearAuthentication,
     }),
     [
       user,
       isLoading,
+
       login,
       logout,
+
       refreshUser,
+
+      authenticate,
+      clearAuthentication,
     ]
   );
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={value}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
 
   if (!context) {
     throw new Error(

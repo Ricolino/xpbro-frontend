@@ -1,61 +1,198 @@
-import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { accountApi } from "@/api/account.api";
-import { setAccessToken } from "@/api/axios";
-import { useAuth } from "@/auth/AuthContext";
+import { authApi } from "@/api/auth.api";
+import {
+  setAccessToken,
+} from "@/api/axios";
 
-export const GoogleCallbackPage = () => {
-  const navigate = useNavigate();
+import type {
+  CurrentUser,
+  LoginRequest,
+} from "@/types";
 
-  const [searchParams] = useSearchParams();
+interface AuthContextValue {
+  user: CurrentUser | null;
 
-  const { refreshUser } = useAuth();
+  isAuthenticated: boolean;
 
-  useEffect(() => {
-    const completeGoogleLogin = async () => {
-      try {
-        const token =
-          searchParams.get("token");
+  isLoading: boolean;
 
-        if (!token) {
-          navigate("/login", {
-            replace: true,
-          });
+  login: (
+    request: LoginRequest
+  ) => Promise<void>;
 
-          return;
-        }
+  logout: () => Promise<void>;
 
-        setAccessToken(token);
+  refreshUser: () => Promise<void>;
 
+  authenticate: (
+    accessToken: string
+  ) => Promise<void>;
+
+  clearAuthentication: () => void;
+}
+
+const AuthContext =
+  createContext<AuthContextValue | null>(
+    null
+  );
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider = ({
+  children,
+}: AuthProviderProps) => {
+  const [user, setUser] =
+    useState<CurrentUser | null>(
+      null
+    );
+
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const refreshUser = useCallback(
+    async () => {
+      const currentUser =
         await accountApi.me();
 
+      setUser(currentUser);
+    },
+    []
+  );
+
+  const clearAuthentication =
+    useCallback(() => {
+      setAccessToken(null);
+
+      setUser(null);
+    }, []);
+
+  const authenticate =
+    useCallback(
+      async (
+        accessToken: string
+      ) => {
+        setAccessToken(
+          accessToken
+        );
+
         await refreshUser();
+      },
+      [refreshUser]
+    );
 
-        navigate("/", {
-          replace: true,
-        });
-      } catch {
-        setAccessToken(null);
+  const login = useCallback(
+    async (
+      request: LoginRequest
+    ) => {
+      const response =
+        await authApi.login(
+          request
+        );
 
-        navigate("/login", {
-          replace: true,
-        });
+      await authenticate(
+        response.accessToken
+      );
+    },
+    [authenticate]
+  );
+
+  const logout = useCallback(
+    async () => {
+      try {
+        await authApi.logout();
+      } finally {
+        clearAuthentication();
       }
-    };
+    },
+    [clearAuthentication]
+  );
 
-    void completeGoogleLogin();
-  }, [navigate, refreshUser, searchParams]);
+  useEffect(() => {
+    const bootstrapAuth =
+      async () => {
+        try {
+          const response =
+            await authApi.refresh();
+
+          await authenticate(
+            response.accessToken
+          );
+        } catch {
+          clearAuthentication();
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+    void bootstrapAuth();
+  }, [
+    authenticate,
+    clearAuthentication,
+  ]);
+
+  const value = useMemo<
+    AuthContextValue
+  >(
+    () => ({
+      user,
+
+      isAuthenticated: !!user,
+
+      isLoading,
+
+      login,
+      logout,
+
+      refreshUser,
+
+      authenticate,
+
+      clearAuthentication,
+    }),
+    [
+      user,
+      isLoading,
+
+      login,
+      logout,
+
+      refreshUser,
+
+      authenticate,
+      clearAuthentication,
+    ]
+  );
 
   return (
-    <div className="mx-auto mt-20 max-w-md text-center">
-      <h1 className="text-2xl font-bold">
-        Signing in...
-      </h1>
-
-      <p className="mt-2 text-gray-600">
-        Completing Google authentication.
-      </p>
-    </div>
+    <AuthContext.Provider
+      value={value}
+    >
+      {children}
+    </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context =
+    useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be used inside AuthProvider"
+    );
+  }
+
+  return context;
 };

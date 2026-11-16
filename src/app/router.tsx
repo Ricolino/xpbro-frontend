@@ -6,6 +6,8 @@ import {
 import { AdminRoute } from "@/auth/AdminRoute";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
 
+import { AppLayout } from "@/components/layouts/AppLayout";
+
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { RegisterPage } from "@/pages/auth/RegisterPage";
 import { GoogleCallbackPage } from "@/pages/auth/GoogleCallbackPage";
@@ -36,13 +38,19 @@ export const router = createBrowserRouter([
 
     children: [
       {
-        path: "/",
-        element: <DashboardPage />,
-      },
+        element: <AppLayout />,
 
-      {
-        path: "/profile",
-        element: <ProfilePage />,
+        children: [
+          {
+            path: "/",
+            element: <DashboardPage />,
+          },
+
+          {
+            path: "/profile",
+            element: <ProfilePage />,
+          },
+        ],
       },
     ],
   },
@@ -52,14 +60,25 @@ export const router = createBrowserRouter([
 
     children: [
       {
-        path: "/administration/users",
-        element: <AdminUsersPage />,
+        element: <AppLayout />,
+
+        children: [
+          {
+            path: "/administration/users",
+            element: <AdminUsersPage />,
+          },
+        ],
       },
     ],
   },
 
   {
     path: "*",
-    element: <Navigate to="/" replace />,
+    element: (
+      <Navigate
+        to="/"
+        replace
+      />
+    ),
   },
 ]);
