@@ -4,6 +4,15 @@ import type {
   InternalAxiosRequestConfig,
 } from "axios";
 
+const apiUrl =
+  import.meta.env.VITE_API_URL;
+
+if (!apiUrl) {
+  throw new Error(
+    "VITE_API_URL is not configured."
+  );
+}
+
 let accessToken: string | null = null;
 
 export const setAccessToken = (
@@ -17,7 +26,7 @@ export const getAccessToken = () => {
 };
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: apiUrl,
   withCredentials: true,
 });
 
@@ -37,17 +46,32 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
 
-  async (
-    error: AxiosError
-  ): Promise<never> => {
+  async (error: AxiosError) => {
     const originalRequest =
-      error.config as InternalAxiosRequestConfig & {
-        _retry?: boolean;
-      };
+      error.config as
+        | (InternalAxiosRequestConfig & {
+            _retry?: boolean;
+          })
+        | undefined;
+
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
     if (
       error.response?.status !== 401 ||
-      originalRequest?._retry
+      originalRequest._retry
+    ) {
+      return Promise.reject(error);
+    }
+
+    //
+    // Evită refresh loop
+    //
+    if (
+      originalRequest.url?.includes(
+        "/auth/refresh"
+      )
     ) {
       return Promise.reject(error);
     }
@@ -59,7 +83,7 @@ api.interceptors.response.use(
         await axios.post<{
           accessToken: string;
         }>(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
+          `${apiUrl}/auth/refresh`,
           {},
           {
             withCredentials: true,

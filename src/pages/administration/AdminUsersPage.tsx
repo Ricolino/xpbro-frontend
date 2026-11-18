@@ -11,6 +11,7 @@ import { useEnableUser } from "@/hooks/useEnableUser";
 import { useUsers } from "@/hooks/useUsers";
 
 import type { UserSummary } from "@/types";
+import { Loading } from "@/components/common/Loading";
 
 export const AdminUsersPage = () => {
   const {
@@ -92,12 +93,13 @@ export const AdminUsersPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="p-6">
-        Loading users...
-      </div>
-    );
-  }
+  return (
+    <Loading
+      title="Loading users"
+      message="Fetching user list..."
+    />
+  );
+}
 
   return (
     <>

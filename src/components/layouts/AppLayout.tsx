@@ -31,7 +31,7 @@ export const AppLayout = () => {
 
           <nav className="flex items-center gap-6">
             <Link
-              to="/"
+              to="/dashboard"
               className="hover:text-blue-600"
             >
               Dashboard

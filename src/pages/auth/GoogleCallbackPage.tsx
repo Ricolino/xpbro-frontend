@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
+import { Loading } from "@/components/common/Loading";
 
 export const GoogleCallbackPage = () => {
   const navigate = useNavigate();
@@ -59,16 +60,9 @@ export const GoogleCallbackPage = () => {
   ]);
 
   return (
-    <div className="flex min-h-[50vh] items-center justify-center">
-      <div className="text-center">
-        <h1 className="mb-2 text-2xl font-bold">
-          Signing in...
-        </h1>
-
-        <p className="text-gray-600">
-          Completing Google authentication.
-        </p>
-      </div>
-    </div>
-  );
+  <Loading
+    title="Signing in..."
+    message="Completing Google authentication."
+  />
+);
 };

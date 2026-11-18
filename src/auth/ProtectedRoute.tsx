@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 import { useAuth } from "@/auth/AuthContext";
+import { Loading } from "@/components/common/Loading";
 
 export const ProtectedRoute = () => {
   const {
@@ -9,8 +10,13 @@ export const ProtectedRoute = () => {
   } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  return (
+    <Loading
+      title="Checking session"
+      message="Authenticating user..."
+    />
+  );
+}
 
   if (!isAuthenticated) {
     return (
