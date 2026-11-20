@@ -23,9 +23,8 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Chiloti dirs*/
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
 
