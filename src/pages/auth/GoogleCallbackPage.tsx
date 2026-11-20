@@ -37,7 +37,7 @@ export const GoogleCallbackPage = () => {
             token
           );
 
-          navigate("/", {
+          navigate("/dashboard", {
             replace: true,
           });
         } catch (error) {

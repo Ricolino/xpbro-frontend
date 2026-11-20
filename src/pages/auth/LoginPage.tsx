@@ -44,7 +44,7 @@ export const LoginPage = () => {
 
       await login(form);
 
-      navigate("/");
+      navigate("/dashboard");
     } catch {
       setError("Invalid email or password.");
     } finally {
