@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { authApi } from "@/api/auth.api";
 import { useAuth } from "@/auth/AuthContext";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 
 const initialForm = {
   email: "",
@@ -103,11 +104,7 @@ export const LoginPage = () => {
           />
         </div>
 
-        {error && (
-          <div className="text-red-600">
-            {error}
-          </div>
-        )}
+        <ErrorMessage message={error}/>
 
         <button
           type="submit"

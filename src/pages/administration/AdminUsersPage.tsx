@@ -1,17 +1,20 @@
 import { useState } from "react";
 
+import { Loading } from "@/components/common/Loading";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { ResetPasswordModal } from "@/components/users/ResetPasswordModal";
 import { UserRolesModal } from "@/components/users/UserRolesModal";
 import { UserTable } from "@/components/users/UserTable";
 
-import { useDeleteUser } from "@/hooks/useDeleteUser";
-import { useDisableUser } from "@/hooks/useDisableUser";
-import { useEnableUser } from "@/hooks/useEnableUser";
 import { useUsers } from "@/hooks/useUsers";
+import { useEnableUser } from "@/hooks/useEnableUser";
+import { useDisableUser } from "@/hooks/useDisableUser";
+import { useDeleteUser } from "@/hooks/useDeleteUser";
+
+import { showError, showSuccess } from "@/utils/toast";
+import { getErrorMessage } from "@/utils/api-error";
 
 import type { UserSummary } from "@/types";
-import { Loading } from "@/components/common/Loading";
 
 export const AdminUsersPage = () => {
   const {
@@ -32,20 +35,41 @@ export const AdminUsersPage = () => {
   const [rolesModalOpen, setRolesModalOpen] =
     useState(false);
 
-  const [resetPasswordModalOpen,
-    setResetPasswordModalOpen] =
-    useState(false);
+  const [
+    resetPasswordModalOpen,
+    setResetPasswordModalOpen,
+  ] = useState(false);
 
   const handleEnable = async (
     id: string
   ) => {
-    await enableUser.mutateAsync(id);
+    try {
+      await enableUser.mutateAsync(id);
+
+      showSuccess(
+        "User enabled successfully."
+      );
+    } catch (error) {
+      showError(
+        getErrorMessage(error)
+      );
+    }
   };
 
   const handleDisable = async (
     id: string
   ) => {
-    await disableUser.mutateAsync(id);
+    try {
+      await disableUser.mutateAsync(id);
+
+      showSuccess(
+        "User disabled successfully."
+      );
+    } catch (error) {
+      showError(
+        getErrorMessage(error)
+      );
+    }
   };
 
   const handleDeleteClick = (
@@ -60,18 +84,31 @@ export const AdminUsersPage = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!selectedUser) {
-      return;
-    }
+  const handleDeleteConfirm =
+    async () => {
+      if (!selectedUser) {
+        return;
+      }
 
-    await deleteUser.mutateAsync(
-      selectedUser.id
-    );
+      try {
+        await deleteUser.mutateAsync(
+          selectedUser.id
+        );
 
-    setDeleteDialogOpen(false);
-    setSelectedUser(null);
-  };
+        showSuccess(
+          "User deleted successfully."
+        );
+
+        setDeleteDialogOpen(false);
+        setSelectedUser(null);
+      } catch (error) {
+        setDeleteDialogOpen(false);
+
+        showError(
+          getErrorMessage(error)
+        );
+      }
+    };
 
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
@@ -93,13 +130,13 @@ export const AdminUsersPage = () => {
   };
 
   if (isLoading) {
-  return (
-    <Loading
-      title="Loading users"
-      message="Fetching user list..."
-    />
-  );
-}
+    return (
+      <Loading
+        title="Loading users"
+        message="Fetching users..."
+      />
+    );
+  }
 
   return (
     <>
@@ -113,8 +150,12 @@ export const AdminUsersPage = () => {
           onEnable={handleEnable}
           onDisable={handleDisable}
           onDelete={handleDeleteClick}
-          onManageRoles={handleManageRoles}
-          onResetPassword={handleResetPassword}
+          onManageRoles={
+            handleManageRoles
+          }
+          onResetPassword={
+            handleResetPassword
+          }
         />
       </div>
 

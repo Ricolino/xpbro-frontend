@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { authApi } from "@/api/auth.api";
+import { ErrorMessage } from "@/components/common/ErrorMessage";
 
 interface RegisterFormState {
   firstName: string;
@@ -182,11 +183,7 @@ export const RegisterPage = () => {
           />
         </div>
 
-        {error && (
-          <div className="text-red-600">
-            {error}
-          </div>
-        )}
+        <ErrorMessage message={error}/>
 
         <button
           type="submit"

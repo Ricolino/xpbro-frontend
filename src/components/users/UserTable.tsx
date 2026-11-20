@@ -1,4 +1,5 @@
 import type { UserSummary } from "@/types";
+import { EmptyState } from "../common/EmptyState";
 
 interface UserTableProps {
   users: UserSummary[];
@@ -25,12 +26,13 @@ export const UserTable = ({
   onResetPassword,
 }: UserTableProps) => {
   if (users.length === 0) {
-    return (
-      <div className="rounded border bg-white p-6 text-center">
-        No users found.
-      </div>
-    );
-  }
+  return (
+    <EmptyState
+      title="No users found"
+      message="There are currently no users to display."
+    />
+  );
+}
 
   return (
     <div className="overflow-x-auto">
