@@ -1,5 +1,3 @@
-import { Link } from "react-router-dom";
-
 import { useAuth } from "@/auth/AuthContext";
 
 export const UserProfilePage = () => {
@@ -9,141 +7,261 @@ export const UserProfilePage = () => {
     return null;
   }
 
-  const loginType =
-    user.email.endsWith("@gmail.com")
-      ? "Google (possible)"
-      : "Username / Password";
-
   return (
-    <div className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-8 text-3xl font-bold">
-        User Profile
-      </h1>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">
+          User Profile
+        </h1>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded border bg-white p-6">
-          <h2 className="mb-4 text-xl font-semibold">
-            Account Information
-          </h2>
+        <p className="text-gray-600">
+          Manage your account and connected
+          services.
+        </p>
+      </div>
 
-          <div className="space-y-3">
-            <div>
-              <strong>Display Name:</strong>{" "}
-              {user.firstName} {user.lastName}
-            </div>
-
-            <div>
-              <strong>Email:</strong>{" "}
-              {user.email}
-            </div>
-
-            <div>
-              <strong>User Id:</strong>{" "}
-              {user.id}
-            </div>
-
-            <div>
-              <strong>Email Confirmed:</strong>{" "}
-              {user.emailConfirmed
-                ? "Yes"
-                : "No"}
-            </div>
-
-            <div>
-              <strong>Roles:</strong>{" "}
-              {user.roles.join(", ")}
-            </div>
-
-            <div>
-              <strong>Login Type:</strong>{" "}
-              {loginType}
-            </div>
-
-            <div>
-              <strong>Account Type:</strong>{" "}
-              Standard
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded border bg-white p-6">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <section className="rounded-lg border bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-xl font-semibold">
             Profile Picture
           </h2>
 
-          <div className="flex h-48 items-center justify-center rounded border bg-gray-50">
-            Coming Soon
-          </div>
-        </section>
-
-        <section className="rounded border bg-white p-6">
-          <h2 className="mb-4 text-xl font-semibold">
-            Connected Accounts
-          </h2>
-
-          <div className="space-y-4">
-            <div className="rounded border p-3">
-              Steam Connection
-              <div className="text-sm text-gray-500">
-                Coming Soon
-              </div>
-            </div>
-
-            <div className="rounded border p-3">
-              BGG Connection
-              <div className="text-sm text-gray-500">
-                Coming Soon
-              </div>
-            </div>
-
-            <div className="rounded border p-3">
-              BGA Connection
-              <div className="text-sm text-gray-500">
-                Coming Soon
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded border bg-white p-6">
-          <h2 className="mb-4 text-xl font-semibold">
-            Account Actions
-          </h2>
-
-          <div className="flex flex-col gap-3">
-            <Link
-              to="/profile"
-              className="rounded border p-3 hover:bg-gray-50"
+          <div className="flex flex-col items-center gap-4">
+            <div
+              className="
+                flex
+                h-28
+                w-28
+                items-center
+                justify-center
+                rounded-full
+                bg-blue-600
+                text-4xl
+                font-bold
+                text-white
+              "
             >
-              Edit Profile
-            </Link>
+              {(
+                user.firstName?.[0] ??
+                user.email?.[0] ??
+                "U"
+              ).toUpperCase()}
+            </div>
 
-            <Link
-              to="/profile"
-              className="rounded border p-3 hover:bg-gray-50"
+            <button
+              type="button"
+              disabled
+              className="rounded border px-4 py-2 text-gray-500"
             >
-              Change Password
-            </Link>
+              Upload Photo (Coming Soon)
+            </button>
           </div>
         </section>
 
-        <section className="rounded border bg-white p-6 lg:col-span-2">
+        <section className="rounded-lg border bg-white p-6 shadow-sm lg:col-span-2">
           <h2 className="mb-4 text-xl font-semibold">
-            Future Features
+            Account Information
           </h2>
 
-          <ul className="list-disc space-y-2 pl-6">
-            <li>Achievements</li>
-            <li>Activity History</li>
-            <li>Last Seen</li>
-            <li>Premium Membership</li>
-            <li>Devices & Sessions</li>
-            <li>Steam Statistics</li>
-            <li>BGG Statistics</li>
-            <li>BGA Statistics</li>
-          </ul>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <div className="text-sm text-gray-500">
+                First Name
+              </div>
+
+              <div className="font-medium">
+                {user.firstName}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">
+                Last Name
+              </div>
+
+              <div className="font-medium">
+                {user.lastName}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">
+                Email
+              </div>
+
+              <div className="font-medium">
+                {user.email}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">
+                Email Confirmed
+              </div>
+
+              <div className="font-medium">
+                {user.emailConfirmed
+                  ? "Yes"
+                  : "No"}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">
+                User ID
+              </div>
+
+              <div className="break-all font-medium">
+                {user.id}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">
+                Account Type
+              </div>
+
+              <div className="font-medium">
+                Standard
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">
+                Login Method
+              </div>
+
+              <div className="font-medium">
+                Username / Password
+              </div>
+            </div>
+
+            <div>
+              <div className="text-sm text-gray-500">
+                Roles
+              </div>
+
+              <div className="font-medium">
+                {user.roles.join(", ")}
+              </div>
+            </div>
+          </div>
         </section>
       </div>
+
+      <section className="rounded-lg border bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-xl font-semibold">
+          Security
+        </h2>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded border p-4">
+            <h3 className="font-medium">
+              Change Password
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Manage your account password.
+            </p>
+
+            <button
+              type="button"
+              disabled
+              className="mt-4 rounded border px-4 py-2 text-gray-500"
+            >
+              Coming Soon
+            </button>
+          </div>
+
+          <div className="rounded border p-4">
+            <h3 className="font-medium">
+              Active Sessions
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              View and manage connected devices.
+            </p>
+
+            <button
+              type="button"
+              disabled
+              className="mt-4 rounded border px-4 py-2 text-gray-500"
+            >
+              Coming Soon
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-xl font-semibold">
+          Connected Services
+        </h2>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded border p-4">
+            <h3 className="font-medium">
+              Steam
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Connect your Steam account.
+            </p>
+          </div>
+
+          <div className="rounded border p-4">
+            <h3 className="font-medium">
+              BoardGameGeek
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Connect your BGG account.
+            </p>
+          </div>
+
+          <div className="rounded border p-4">
+            <h3 className="font-medium">
+              Board Game Arena
+            </h3>
+
+            <p className="mt-2 text-sm text-gray-500">
+              Connect your BGA account.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border bg-white p-6 shadow-sm">
+        <h2 className="mb-4 text-xl font-semibold">
+          Future Features
+        </h2>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded border p-3">
+            Achievements
+          </div>
+
+          <div className="rounded border p-3">
+            Activity History
+          </div>
+
+          <div className="rounded border p-3">
+            Last Seen
+          </div>
+
+          <div className="rounded border p-3">
+            Premium Membership
+          </div>
+
+          <div className="rounded border p-3">
+            Collection Statistics
+          </div>
+
+          <div className="rounded border p-3">
+            User Badges
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
