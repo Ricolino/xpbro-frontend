@@ -17,8 +17,6 @@ import {
 import { useAuth } from "@/auth/AuthContext";
 
 export const Header = () => {
-  const navigate = useNavigate();
-
   const {
     user,
     isAuthenticated,
