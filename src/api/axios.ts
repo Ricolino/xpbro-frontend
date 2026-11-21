@@ -1,3 +1,4 @@
+import { emitSessionExpired } from "@/auth/auth-events";
 import axios from "axios";
 import type {
   AxiosError,
@@ -15,6 +16,10 @@ if (!apiUrl) {
 
 let accessToken: string | null = null;
 
+let refreshPromise:
+  | Promise<string>
+  | null = null;
+
 export const setAccessToken = (
   token: string | null
 ) => {
@@ -30,6 +35,9 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+//
+// REQUEST INTERCEPTOR
+//
 api.interceptors.request.use(
   (
     config: InternalAxiosRequestConfig
@@ -43,6 +51,9 @@ api.interceptors.request.use(
   }
 );
 
+//
+// RESPONSE INTERCEPTOR
+//
 api.interceptors.response.use(
   (response) => response,
 
@@ -58,17 +69,12 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    //
+    // Nu încercăm refresh
+    //
     if (
       error.response?.status !== 401 ||
-      originalRequest._retry
-    ) {
-      return Promise.reject(error);
-    }
-
-    //
-    // Evită refresh loop
-    //
-    if (
+      originalRequest._retry ||
       originalRequest.url?.includes(
         "/auth/refresh"
       )
@@ -79,32 +85,55 @@ api.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      const response =
-        await axios.post<{
-          accessToken: string;
-        }>(
-          `${apiUrl}/auth/refresh`,
-          {},
-          {
-            withCredentials: true,
-          }
-        );
+      //
+      // Un singur refresh request
+      //
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post<{
+            accessToken: string;
+          }>(
+            `${apiUrl}/auth/refresh`,
+            {},
+            {
+              withCredentials: true,
+            }
+          )
+          .then((response) => {
+            const newToken =
+              response.data.accessToken;
+
+            setAccessToken(
+              newToken
+            );
+
+            return newToken;
+          })
+          .finally(() => {
+            refreshPromise =
+              null;
+          });
+      }
 
       const newAccessToken =
-        response.data.accessToken;
-
-      setAccessToken(
-        newAccessToken
-      );
+        await refreshPromise;
 
       originalRequest.headers.Authorization =
         `Bearer ${newAccessToken}`;
 
       return api(originalRequest);
-    } catch {
+    } catch (refreshError) {
+      //
+      // sesiune expirată
+      //
       setAccessToken(null);
 
-      return Promise.reject(error);
+      emitSessionExpired();
+
+      return Promise.reject(
+        refreshError
+      );
+
     }
   }
 );

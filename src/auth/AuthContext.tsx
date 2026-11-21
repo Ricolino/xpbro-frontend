@@ -10,9 +10,13 @@ import {
 
 import { accountApi } from "@/api/account.api";
 import { authApi } from "@/api/auth.api";
+import { setAccessToken } from "@/api/axios";
+
 import {
-  setAccessToken,
-} from "@/api/axios";
+  subscribeToSessionExpired,
+} from "@/auth/auth-events";
+
+import { showError } from "@/utils/toast";
 
 import type {
   CurrentUser,
@@ -114,11 +118,16 @@ export const AuthProvider = ({
         await authApi.logout();
       } finally {
         clearAuthentication();
+
+        window.location.href = "/";
       }
     },
     [clearAuthentication]
   );
 
+  //
+  // Bootstrap authentication
+  //
   useEffect(() => {
     const bootstrapAuth =
       async () => {
@@ -142,13 +151,35 @@ export const AuthProvider = ({
     clearAuthentication,
   ]);
 
+  //
+  // Session expired event
+  //
+  useEffect(() => {
+    const unsubscribe =
+      subscribeToSessionExpired(
+        () => {
+          clearAuthentication();
+
+          showError(
+            "Your session has expired. Please sign in again."
+          );
+
+          window.location.href =
+            "/login";
+        }
+      );
+
+    return unsubscribe;
+  }, [clearAuthentication]);
+
   const value = useMemo<
     AuthContextValue
   >(
     () => ({
       user,
 
-      isAuthenticated: !!user,
+      isAuthenticated:
+        !!user,
 
       isLoading,
 

@@ -88,11 +88,9 @@ export const Header = () => {
   };
 
   const handleLogout = async () => {
-    await logout();
-
-    closeMenu();
-
-    navigate("/");
+      closeMenu();
+      
+      await logout();
   };
 
   return (
