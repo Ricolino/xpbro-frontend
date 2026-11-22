@@ -69,18 +69,36 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    //
-    // Nu încercăm refresh
-    //
-    if (
-      error.response?.status !== 401 ||
-      originalRequest._retry ||
-      originalRequest.url?.includes(
-        "/auth/refresh"
-      )
-    ) {
-      return Promise.reject(error);
-    }
+    const isLoginRequest =
+  originalRequest.url?.includes(
+    "/auth/login"
+  );
+
+const isRegisterRequest =
+  originalRequest.url?.includes(
+    "/auth/register"
+  );
+
+const isRefreshRequest =
+  originalRequest.url?.includes(
+    "/auth/refresh"
+  );
+
+const isGoogleCallback =
+  originalRequest.url?.includes(
+    "/auth/google"
+  );
+
+if (
+  error.response?.status !== 401 ||
+  originalRequest._retry ||
+  isRefreshRequest ||
+  isLoginRequest ||
+  isRegisterRequest ||
+  isGoogleCallback
+) {
+  return Promise.reject(error);
+}
 
     originalRequest._retry = true;
 
