@@ -1,8 +1,7 @@
 import {
   BadgeCheck,
   Mail,
-  Shield,
-  User,
+  Shield
 } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
