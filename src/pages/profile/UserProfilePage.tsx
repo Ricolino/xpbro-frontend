@@ -6,6 +6,8 @@ import {
 
 import { useAuth } from "@/auth/AuthContext";
 
+import BggIntegrationCard from "@/features/integrations/components/BggIntegrationCard";
+
 export const UserProfilePage = () => {
   const { user } = useAuth();
 
@@ -289,10 +291,40 @@ export const UserProfilePage = () => {
             description="Connect your Steam account."
           />
 
-          <ServiceCard
-            title="BoardGameGeek"
-            description="Connect your BGG account."
-          />
+          <BggIntegrationCard
+  initialUsername=""
+  initialConnected={false}
+  initialCollectionCount={0}
+  initialImportedGamesCount={0}
+  lastSyncAt={null}
+  onSave={async (username) => {
+    console.log("save", username);
+
+    // TODO:
+    // await accountApi.updateBggUsername(username);
+  }}
+  onTestConnection={async (username) => {
+    console.log("test", username);
+
+    // TODO:
+    // const result = await accountApi.testBggConnection(username);
+
+    return {
+      success: true,
+      userExists: true,
+      collectionAccessible: true,
+      apiReachable: true,
+      collectionCount: 1247,
+      importedGamesCount: 1189,
+    };
+  }}
+  onSyncCollection={async () => {
+    console.log("sync collection");
+
+    // TODO:
+    // await accountApi.syncBggCollection();
+  }}
+/>
 
           <ServiceCard
             title="Board Game Arena"
