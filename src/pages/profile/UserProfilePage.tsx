@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   BadgeCheck,
   Mail,
@@ -7,13 +8,27 @@ import {
 import { useAuth } from "@/auth/AuthContext";
 
 import BggIntegrationCard from "@/features/integrations/components/BggIntegrationCard";
+import { bggApi } from "@/features/integrations/api/BggApi";
 
 export const UserProfilePage = () => {
   const { user } = useAuth();
+  const [bggUsername, setBggUsername] =
+    useState("");
 
   if (!user) {
     return null;
   }
+
+ useEffect(() => {
+  const loadBgg = async () => {
+    const profile =
+      await bggApi.getProfile();
+
+    setBggUsername(profile.username);
+  };
+
+  loadBgg();
+}, []);
 
   const initials = (
     user.firstName?.[0] ??
@@ -292,32 +307,22 @@ export const UserProfilePage = () => {
           />
 
           <BggIntegrationCard
-  initialUsername=""
+  initialUsername={bggUsername}
   initialConnected={false}
   initialCollectionCount={0}
   initialImportedGamesCount={0}
   lastSyncAt={null}
   onSave={async (username) => {
-    console.log("save", username);
+    await bggApi.saveUsername(
+      username
+    );
 
-    // TODO:
-    // await accountApi.updateBggUsername(username);
+    setBggUsername(username);
   }}
-  onTestConnection={async (username) => {
-    console.log("test", username);
+  onTestConnection={() =>
+    bggApi.testConnection()
+  }
 
-    // TODO:
-    // const result = await accountApi.testBggConnection(username);
-
-    return {
-      success: true,
-      userExists: true,
-      collectionAccessible: true,
-      apiReachable: true,
-      collectionCount: 1247,
-      importedGamesCount: 1189,
-    };
-  }}
   onSyncCollection={async () => {
     console.log("sync collection");
 
